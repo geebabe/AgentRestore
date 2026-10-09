@@ -48,4 +48,4 @@ PydanticAI / OpenAI Agents SDK / MCP (Phase 2).
 
 ## License
 
-TBD.
+[Apache-2.0](LICENSE)

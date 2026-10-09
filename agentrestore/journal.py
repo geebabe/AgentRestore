@@ -8,7 +8,14 @@ from collections.abc import Iterable, Mapping
 from dataclasses import replace
 from typing import Any
 
-from .hashing import canonicalize, hash_args, hash_content, hash_tree, make_effect_fingerprint
+from .hashing import (
+    canonicalize,
+    hash_args,
+    hash_content,
+    hash_file,
+    hash_tree,
+    make_effect_fingerprint,
+)
 from .store import JournalStore
 from .types import (
     ApiRef,
@@ -119,11 +126,17 @@ class Journal:
         result: Any = None,
         status: EffectStatus = EffectStatus.SUCCESS,
     ) -> EffectEntry:
-        """Record a single file's change as a file effect."""
+        """Record a single file's change as a file effect.
+
+        When ``hash_after`` is omitted, the file's current contents are hashed
+        (or ``None`` is recorded if the file no longer exists, meaning deleted).
+        """
+        if hash_after is None:
+            hash_after = hash_file(path) if os.path.isfile(path) else None
         ref = FileRef(
             path=path,
             hash_before=hash_before,
-            hash_after=hash_after if hash_after is not None else None,
+            hash_after=hash_after,
             size=_size(path),
         )
         return self.record(

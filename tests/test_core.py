@@ -49,6 +49,19 @@ def test_explicit_journal_file_change(tmp_path: Path) -> None:
             pass
 
 
+def test_explicit_journal_file_change_no_drift_when_unchanged(tmp_path: Path) -> None:
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    db = tmp_path / "j.db"
+    p = ws / "a.txt"
+    with AgentRestore(checkpoint_id="c1", store=str(db)) as ar:
+        _write(p, "hello")
+        ar.journal_file_change(str(p))
+    # File is untouched between runs: resume must NOT raise drift.
+    with AgentRestore(checkpoint_id="c1", store=str(db)):
+        pass
+
+
 def test_scan_and_reconcile_standalone(tmp_path: Path) -> None:
     ws = tmp_path / "ws"
     ws.mkdir()
